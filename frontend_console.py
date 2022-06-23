@@ -3,6 +3,7 @@ from backend import read_from_file as rff
 from backend import add_record as ar
 from backend import write_record_to_file as wrtf
 from backend import format_to_csv as f_csv
+import logger_new
 flag = ''
 opened_file = ''
 
@@ -10,16 +11,26 @@ opened_file = ''
 def main():
     global flag
     global opened_file
+
+    logger_new.logger_cls()
+    logger_new.logger.info('START PROGRAM')
+
     opened_file = ''
     flag = 'main'
     print('Phonebook by CodeShavers salute you')
     print('\ntype "show" to see existing phonebooks')
+
+    logger_new.logger.info('start loop')
+
     while True:
         command_processor(input_commands_with_check())
 
 
 def input_commands_with_check():
     global flag
+
+    logger_new.logger.debug(f'user in {flag} menu')
+
     print(f'\n--> you are in -={flag} menu=-')
 
     commands = ['quit']
@@ -37,13 +48,16 @@ def input_commands_with_check():
     while True:
         user_in = input('\ntype command or help: \n')
         if user_in.lower() in commands:
+            logger_new.logger.debug(f'the user entered the command {user_in}')
             return user_in.lower()
         else:
+            logger_new.logger.error(f'the user entered INCORRECT command')
             print(f'{user_in} are unrecognized command')
 
 
 def command_processor(command: str):
     if command == 'quit':
+        logger_new.logger.info('USER EXIT FROM PROGRAM')
         return quit()
     if command == 'show':
         return file_manager()
@@ -74,21 +88,26 @@ def command_processor(command: str):
 # check for number
 def input_number_of_showing_records():
     while True:
+        logger_new.logger.info('CHECK THE NUMBER')
         user_in = input('\ninput number of showing records: \n')
         if user_in.isdigit():
+            logger_new.logger.debug('number is TRUE')
             return user_in
         else:
+            logger_new.logger.error('number is incorrect')
             print(f'{user_in} are not a number')
 
 
 def input_info_for_record(filename: str, format_type: str):
     global flag
     flag = 'read'
+    logger_new.logger.info('START USER ADD INFO')
     name = input('Name: \n')
     phone = input('Phone: \n')
     adress = input('Adress: \n')
     rec = ar(name, phone, adress)
     wrtf(rec, filename, format_type)
+    logger_new.logger.info('END ADD. User updated list and base file')
     open_existing_file(filename, format_type)
 
 
@@ -105,6 +124,7 @@ def open_existing_file(filename: str, format_type: str):
 
 
 def create_new_file(filename: str, format_type: str):
+    logger_new.logger.debug(f'Create new file {filename}.{format_type}')
     with open(f'{filename}.{format_type}', 'w') as file:
         file.write('txt file for Phonebook by CodeShavers\n')
 
@@ -123,6 +143,7 @@ def file_manager():
     print("Existed Phonebooks: \n")
     paths = (sorted(Path('.').glob('*.txt')))
     print("\n".join(list(map(str, paths))))
+    logger_new.logger.debug(f'Print file manager {"     ".join(list(map(str, paths)))}')
 
 
 def help_menu(previous_flag: str):
